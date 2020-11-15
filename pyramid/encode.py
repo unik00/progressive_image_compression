@@ -2,11 +2,13 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
+from pyramid.utils import *
+
 
 def get_median(in_list):
     """
     Args
-        in_list: list
+        in_list: list of tuples (value, coordinate)
     """
     return sorted(in_list)[len(in_list) // 2]
 
@@ -19,36 +21,60 @@ def process(im, level):
     Returns:
         new_im
     """
+    if level == 1:
+        cv2.imwrite("output/0.jpg", im)
+
+        plt.imshow(im)
+        plt.show()
+
     print("im shape: ", im.shape)
-    if im.shape[0] * im.shape[1] == 0:
-        # TODO: mất bit
-        return []
 
+    new_im = np.zeros(((im.shape[0] + 1) // 2, (im.shape[1] + 1) // 2), np.uint8)
+    compressed_layer = list()
 
-    new_im = np.zeros(((im.shape[0] + 1)//2,(im.shape[1]+1)//2), np.uint8)
-
+    def valid_coord(x, y):
+        return im.shape[0] > x >= 0 and im.shape[1] > y >= 0
 
     for i in range(0, im.shape[0], 2):
         for j in range(0, im.shape[1], 2):
-            median_list = []
-            median_list.append(im[i,j])
-            if j+1 < im.shape[1]: median_list.append(im[i,j+1])
-            if i+1 < im.shape[0]: median_list.append(im[i+1,j])
-            if i+1<im.shape[0] and j+1<im.shape[1]: median_list.append(im[i+1,j+1])
-            median = get_median(median_list)
-            new_im[i//2, j//2] = median
+            this_im = list()
+            for t in [False, True]:
+                for k in [False, True]:
+                    if valid_coord(i + int(t), j + int(k)):
+                        this_im.append((im[i + int(t), j + int(k)], (t, k)))
 
-    # cv2.imwrite("{}.jpg".format(level), new_im)
+            median, coord = get_median(this_im)
+
+            compressed_group = list()
+            for t in [False, True]:
+                for k in [False, True]:
+                    if valid_coord(i + int(t), j + int(k)):
+                        # if (t, k) == coord:
+                        #     compressed_group.append((t, k))
+                        # else:
+
+                        compressed_group.append((im[i + int(t), j + int(k)]))
+
+            print(i, j)
+            print(compressed_group)
+
+            compressed_layer += compressed_group
+            new_im[i // 2, j // 2] = median
+
+    cv2.imwrite("output/{}.jpg".format(level), new_im)
     plt.imshow(new_im)
     plt.show()
 
-    if new_im.shape != im.shape:
-        process(new_im, level + 1)
-    return new_im
+    if im.shape == (1, 1):
+        return [im[0, 0]]
+    print("compressed layer:\n ", compressed_layer)
+    print("im: \n", im)
+    return process(new_im, level + 1) + compressed_layer
 
 
 if __name__ == "__main__":
     im = cv2.imread('data/sample.jpg', 0)
-    # plt.imshow(im)
-    # plt.show()
-    process(im, 1)
+
+    compressed = process(im, 1)
+    # print(bytes(compressed))
+    save_obj(compressed, "compressed")
