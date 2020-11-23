@@ -39,11 +39,14 @@ if __name__ == '__main__':
 
                         if type(this_data[m]) == tuple:
                             # use data of previous layer
-                            this_layer[i, j] = 255
+                            this_layer[i, j] = last_layer[i // 2, j // 2]
                         else:
                             this_layer[i, j] = this_data[m]
 
                         m += 1
+
+        fig = plt.figure()
+        fig.set_size_inches(8.5, 8.5)
 
         plt.imshow(this_layer)
         plt.show()

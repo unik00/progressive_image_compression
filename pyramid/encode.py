@@ -49,14 +49,13 @@ def process(im, level):
             for t in [False, True]:
                 for k in [False, True]:
                     if valid_coord(i + int(t), j + int(k)):
-                        # if (t, k) == coord:
-                        #     compressed_group.append((t, k))
-                        # else:
+                        if (t, k) == coord:
+                            compressed_group.append((t, k))
+                        else:
+                            compressed_group.append((im[i + int(t), j + int(k)]))
 
-                        compressed_group.append((im[i + int(t), j + int(k)]))
-
-            print(i, j)
-            print(compressed_group)
+            # print(i, j)
+            # print(compressed_group)
 
             compressed_layer += compressed_group
             new_im[i // 2, j // 2] = median
