@@ -1,16 +1,24 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.spatial.distance import cdist, euclidean
 
 from pyramid.utils import *
 
 
-def get_median(in_list):
-    """
-    Args
-        in_list: list of tuples (value, coordinate)
-    """
-    return sorted(in_list)[len(in_list) // 2]
+def geometric_median(in_list):
+    chosen = in_list[0]
+    ans_sum = 1e9
+
+    for val, coord in in_list:
+        sum = 0
+        for val2, coord2 in in_list:
+            sum += euclidean(val, val2)
+        if sum < ans_sum:
+            chosen = (val, coord)
+            ans_sum = sum
+
+    return chosen
 
 
 def process(im, level):
@@ -29,7 +37,7 @@ def process(im, level):
 
     print("im shape: ", im.shape)
 
-    new_im = np.zeros(((im.shape[0] + 1) // 2, (im.shape[1] + 1) // 2), np.uint8)
+    new_im = np.zeros(((im.shape[0] + 1) // 2, (im.shape[1] + 1) // 2, 3), np.uint8)
     compressed_layer = list()
 
     def valid_coord(x, y):
@@ -43,7 +51,7 @@ def process(im, level):
                     if valid_coord(i + int(t), j + int(k)):
                         this_im.append((im[i + int(t), j + int(k)], (t, k)))
 
-            median, coord = get_median(this_im)
+            median, coord = geometric_median(this_im)
 
             compressed_group = list()
             for t in [False, True]:
@@ -58,13 +66,13 @@ def process(im, level):
             # print(compressed_group)
 
             compressed_layer += compressed_group
-            new_im[i // 2, j // 2] = median
+            new_im[i // 2, j // 2, :] = median
 
     cv2.imwrite("output/{}.jpg".format(level), new_im)
     plt.imshow(new_im)
     plt.show()
 
-    if im.shape == (1, 1):
+    if im.shape == (1, 1, 3):
         return [im[0, 0]]
     print("compressed layer:\n ", compressed_layer)
     print("im: \n", im)
@@ -72,8 +80,8 @@ def process(im, level):
 
 
 if __name__ == "__main__":
-    im = cv2.imread('data/sample.jpg', 0)
-
+    im = cv2.imread('data/lena_color.jpg')
+    im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     compressed = process(im, 1)
     # print(bytes(compressed))
     save_obj(compressed, "compressed")

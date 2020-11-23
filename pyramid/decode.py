@@ -17,7 +17,7 @@ if __name__ == '__main__':
     while index < len(loaded):
 
         n = (1 << level)
-        this_layer = np.zeros((n, n), dtype=np.uint8)
+        this_layer = np.zeros((n, n, 3), dtype=np.uint8)
         this_data = loaded[index:index + n*n]
         print("this data")
         print(this_data)
