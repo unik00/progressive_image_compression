@@ -24,10 +24,10 @@ def process(im, level):
     if level == 1:
         cv2.imwrite("output/0.jpg", im)
 
-        plt.imshow(im)
-        plt.show()
+        # plt.imshow(im)
+        # plt.show()
 
-    print("im shape: ", im.shape)
+    # print("im shape: ", im.shape)
 
     new_im = np.zeros(((im.shape[0] + 1) // 2, (im.shape[1] + 1) // 2), np.uint8)
     compressed_layer = list()
@@ -63,19 +63,30 @@ def process(im, level):
             new_im[i // 2, j // 2] = median
 
     cv2.imwrite("output/{}.jpg".format(level), new_im)
-    plt.imshow(new_im)
-    plt.show()
+    # plt.imshow(new_im)
+    # plt.show()
 
     if im.shape == (1, 1):
         return [im[0, 0]]
-    print("compressed layer:\n ", compressed_layer)
-    print("im: \n", im)
+    # print("compressed layer:\n ", compressed_layer)
+    # print("im: \n", im)
     return process(new_im, level + 1) + compressed_layer
 
 
 if __name__ == "__main__":
-    im = cv2.imread('data/sample.jpg', 0)
+    im = cv2.imread('data/lena512.bmp', 0)
+
+    rList = []
+    for i in range(im.shape[0]):
+        for j in range(im.shape[1]):
+            rList.append(im[i, j])
+
+    new_file = open("data_bin.bin", "wb")
+    arr = bytearray(rList)
+    new_file.write(arr)
 
     compressed = process(im, 1)
-    # print(bytes(compressed))
-    save_obj(compressed, "compressed")
+
+    # save_obj(compressed, "compressed")
+    # print("compressed: \n\n")
+    print(*compressed)
