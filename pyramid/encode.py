@@ -45,14 +45,16 @@ def process(im, level):
 
             median, coord = get_median(this_im)
 
+
             compressed_group = list()
             for t in [False, True]:
                 for k in [False, True]:
                     if valid_coord(i + int(t), j + int(k)):
                         if (t, k) == coord:
-                            compressed_group.append((t, k))
+                            removed_position = (int(t)<<1) + int(k)
                         else:
                             compressed_group.append((im[i + int(t), j + int(k)]))
+            compressed_group = [removed_position] + compressed_group
 
             # print(i, j)
             # print(compressed_group)
