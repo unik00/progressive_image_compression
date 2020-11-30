@@ -33,13 +33,13 @@ if __name__ == '__main__':
                 yy = -1
 
                 if last_layer is not None:
-                    xx = this_data[0] & 2
+                    xx = this_data[m] & 2
                     if (xx > 0):
                         xx = 1
-                    yy = this_data[0] & 1
-                    print("xx, yy: ", xx, yy)
-                    print("this layer shape: ", this_layer.shape)
-                    print("l, h: ", l+xx, h+yy)
+                    yy = this_data[m] & 1
+                    # print("xx, yy: ", xx, yy)
+                    # print("this layer shape: ", this_layer.shape)
+                    # print("l+xx, h+yy: ", l+xx, h+yy)
                     this_layer[l + xx, h + yy] = last_layer[(l + xx) // 2, (h+yy) // 2]
                     m += 1
                 else:
@@ -56,11 +56,12 @@ if __name__ == '__main__':
                         if not valid_coord(i, j):
                             continue
 
+
+                        this_layer[i, j] = this_data[m]
+
                         # print("this layer: \n", this_layer)
                         # print("m: ", m)
                         # print(this_data[m])
-
-                        this_layer[i, j] = this_data[m]
 
                         m += 1
 
