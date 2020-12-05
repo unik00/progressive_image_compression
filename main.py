@@ -25,7 +25,7 @@ def run_huffman(path):
 
 
 if __name__ == "__main__":
-    im = cv2.imread('data/sample.jpg', 0)
+    im = cv2.imread('data/lena.bmp', 0)
     layers, positions = encode.process(im, 1)
 
     im_data_path = "im_data.txt"
