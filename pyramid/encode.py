@@ -22,7 +22,7 @@ def process(im, level):
         new_im
     """
     if level == 1:
-        cv2.imwrite("output/0.jpg", im)
+        cv2.imwrite("output/0.bmp", im)
 
         # plt.imshow(im)
         # plt.show()
@@ -34,6 +34,8 @@ def process(im, level):
 
     def valid_coord(x, y):
         return im.shape[0] > x >= 0 and im.shape[1] > y >= 0
+
+    positions = list()
 
     for i in range(0, im.shape[0], 2):
         for j in range(0, im.shape[1], 2):
@@ -54,7 +56,8 @@ def process(im, level):
                             removed_position = (int(t)<<1) + int(k)
                         else:
                             compressed_group.append((im[i + int(t), j + int(k)]))
-            compressed_group = [removed_position] + compressed_group
+            # compressed_group = [removed_position] + compressed_group
+            positions.append(removed_position)
 
             # print(i, j)
             # print(compressed_group)
@@ -62,31 +65,40 @@ def process(im, level):
             compressed_layer += compressed_group
             new_im[i // 2, j // 2] = median
 
-    cv2.imwrite("output/{}.jpg".format(level), new_im)
+    cv2.imwrite("output/{}.bmp".format(level), new_im)
     # plt.imshow(new_im)
     # plt.show()
 
     if im.shape == (1, 1):
-        return [im[0, 0]]
-    # print("compressed layer:\n ", compressed_layer)
+        return [list([im[0, 0]]), list([])]
+
+    next_level = process(new_im, level + 1)
+
+    print("compressed layer:\n ", compressed_layer)
+    print("position:\n", positions)
+
     # print("im: \n", im)
-    return process(new_im, level + 1) + compressed_layer
+    print("next level: \n", next_level)
+    return list(next_level[0]) + list(compressed_layer), list(next_level[1]) + list(positions)
 
 
 if __name__ == "__main__":
-    im = cv2.imread('data/lena512.bmp', 0)
+    im = cv2.imread('data/lena.bmp', 0)
 
-    rList = []
-    for i in range(im.shape[0]):
-        for j in range(im.shape[1]):
-            rList.append(im[i, j])
-
-    new_file = open("data_bin.bin", "wb")
-    arr = bytearray(rList)
-    new_file.write(arr)
+    # rList = []
+    # for i in range(im.shape[0]):
+    #     for j in range(im.shape[1]):
+    #         rList.append(im[i, j])
+    #
+    # new_file = open("data_bin.bin", "wb")
+    # arr = bytearray(rList)
+    # new_file.write(arr)
 
     compressed = process(im, 1)
 
     # save_obj(compressed, "compressed")
     # print("compressed: \n\n")
     print(*compressed)
+    # new_file = open("data_bin.bin", "wb")
+    # arr = bytearray(compressed)
+    # new_file.write(arr)

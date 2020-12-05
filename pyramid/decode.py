@@ -3,29 +3,23 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-from pyramid.utils import load_obj
 
-
-if __name__ == '__main__':
-    loaded = load_obj('compressed')
-    print(loaded[:10])
-
+def process(loaded, position_data):
     level = 0
     index = 0
     last_layer = None
+    pos = 0
+    m = 0
+    this_data = loaded
 
     while index < len(loaded):
-
         n = (1 << level)
         this_layer = np.zeros((n, n), dtype=np.uint8)
-        this_data = loaded[index:index + n*n]
-        print("this data")
-        print(this_data)
+        # this_data = loaded[index:index + n*n]
 
         def valid_coord(x, y):
             return n>x>=0 and n>y>=0
 
-        m = 0
 
         for l in range(0, n, 2):
             for h in range(0, n, 2):
@@ -33,22 +27,18 @@ if __name__ == '__main__':
                 yy = -1
 
                 if last_layer is not None:
-                    xx = this_data[m] & 2
-                    if (xx > 0):
+                    xx = position_data[pos] & 2
+
+                    if xx > 0:
                         xx = 1
-                    yy = this_data[m] & 1
-                    # print("xx, yy: ", xx, yy)
-                    # print("this layer shape: ", this_layer.shape)
-                    # print("l+xx, h+yy: ", l+xx, h+yy)
+
+                    yy = position_data[pos] & 1
                     this_layer[l + xx, h + yy] = last_layer[(l + xx) // 2, (h+yy) // 2]
-                    m += 1
-                else:
-                    m += 0
+                    pos += 1
 
                 for t in [False, True]:
                     for k in [False, True]:
                         if int(t) == xx and int(k) == yy:
-                            #m += 1
                             continue
 
                         i = l + int(t)
@@ -56,12 +46,8 @@ if __name__ == '__main__':
                         if not valid_coord(i, j):
                             continue
 
-
+                        assert m < len(this_data), print(len(this_data), m)
                         this_layer[i, j] = this_data[m]
-
-                        # print("this layer: \n", this_layer)
-                        # print("m: ", m)
-                        # print(this_data[m])
 
                         m += 1
 
